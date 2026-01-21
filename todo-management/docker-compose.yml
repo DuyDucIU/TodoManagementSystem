@@ -40,9 +40,6 @@ volumes:
 # 3. Connect to MySQL Docker
 # Host: localhost
 # Port: 3307
-# User: todo
-# Pass: todo
-# DB: todo_db
 #
 # 4. Stop
 # docker compose down
