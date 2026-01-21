@@ -1,0 +1,52 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: mysql
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: unless-stopped
+
+  app:
+    image: todo-docker:0.5
+    container_name: todo-app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/todo_management
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 1611
+    depends_on:
+      - mysql
+
+volumes:
+  mysql_data:
+    external: true
+
+# =============================
+# HOW TO USE
+# =============================
+# 1. Build & start
+# docker compose up -d --build
+#
+# 2. Logs
+# docker compose logs -f mysql
+# docker compose logs -f app
+#
+# 3. Connect to MySQL Docker
+# Host: localhost
+# Port: 3307
+# User: todo
+# Pass: todo
+# DB: todo_db
+#
+# 4. Stop
+# docker compose down
+#
+# 5. Reset DB (DANGER: deletes all data in volume)
+# docker compose down -v
+# =============================
