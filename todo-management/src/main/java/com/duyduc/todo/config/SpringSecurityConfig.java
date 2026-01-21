@@ -43,13 +43,13 @@ public class SpringSecurityConfig {
                 auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-//                        .requestMatchers(HttpMethod.GET, "/api/todos/**").permitAll()
-//                        .requestMatchers(HttpMethod.POST, "/api/**").hasRole("ADMIN")
-//                        .requestMatchers(HttpMethod.PUT, "/api/**").hasRole("ADMIN")
-//                        .requestMatchers(HttpMethod.PATCH, "/api/todos/{id}/**").hasAnyRole("ADMIN", "USER")
-//                        .requestMatchers(HttpMethod.PATCH, "/api/**").hasRole("ADMIN")
-//                        .requestMatchers(HttpMethod.DELETE, "/api/**").hasRole("ADMIN")
-//                        .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.GET, "/api/todos/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/todos/{id}/**").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("ADMIN", "USER")
                         .anyRequest().authenticated()
         );
 
