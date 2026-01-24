@@ -8,44 +8,37 @@ const TodoComponent = () => {
     const [title, setTitle] = useState('')
     const [description, setDescription] = useState('')
     const [completed, setCompleted] = useState(false)
+    const [loading, setLoading] = useState(false)
     const navigate = useNavigate()
     const { id } = useParams()
 
 
     function saveOrUpdateTodo(e) {
         e.preventDefault()
+        setLoading(true)
 
         const todo = { title, description, completed }
         console.log(todo);
 
         if (id) {
-
             updateTodo(id, todo).then((response) => {
                 navigate('/todos')
             }).catch(error => {
                 console.error(error);
+                setLoading(false)
             })
-
         } else {
             saveTodo(todo).then((response) => {
                 console.log(response.data)
                 navigate('/todos')
             }).catch(error => {
                 console.error(error);
+                setLoading(false)
             })
         }
     }
 
-    function pageTitle() {
-        if (id) {
-            return <h2 className='text-center'>Update Todo</h2>
-        } else {
-            return <h2 className='text-center'>Add Todo</h2>
-        }
-    }
-
     useEffect(() => {
-
         if (id) {
             getTodo(id).then((response) => {
                 console.log(response.data)
@@ -56,62 +49,79 @@ const TodoComponent = () => {
                 console.error(error);
             })
         }
-
     }, [id])
 
     return (
-        <div className='container'>
-            <br /> <br />
-            <div className='row'>
-                <div className='card col-md-6 offset-md'>
-                    {pageTitle()}
-                    <div className='card-body'>
-                        <form>
-                            <div className='form-group mb-2'>
-                                <label className='form-label'>Todo Title:</label>
-                                <input
-                                    type='text'
-                                    className='form-control'
-                                    placeholder='Enter Todo Title'
-                                    name='title'
-                                    value={title}
-                                    onChange={(e) => setTitle(e.target.value)}
-                                >
-                                </input>
-                            </div>
-
-                            <div className='form-group mb-2'>
-                                <label className='form-label'>Todo Description:</label>
-                                <input
-                                    type='text'
-                                    className='form-control'
-                                    placeholder='Enter Todo Description'
-                                    name='description'
-                                    value={description}
-                                    onChange={(e) => setDescription(e.target.value)}
-                                >
-                                </input>
-                            </div>
-
-                            <div className='form-group mb-2'>
-                                <label className='form-label'>Todo Completed:</label>
-                                <select
-                                    className='form-control'
-                                    value={completed}
-                                    onChange={(e) => setCompleted(e.target.value)}
-                                >
-                                    <option value="false">No</option>
-                                    <option value="true">Yes</option>
-
-                                </select>
-                            </div>
-
-                            <button className='btn btn-success' onClick={(e) => saveOrUpdateTodo(e)}>Submit</button>
-                        </form>
-
-                    </div>
+        <div className='todo-form-container'>
+            <div className='todo-form-card'>
+                <div className='todo-form-header'>
+                    <h2>{id ? '✎ Edit Task' : '+ Create New Task'}</h2>
                 </div>
 
+                <div className='todo-form-body'>
+                    <form onSubmit={saveOrUpdateTodo}>
+                        <div className='form-group'>
+                            <label className='form-label'>Task Title</label>
+                            <input
+                                type='text'
+                                className='form-control'
+                                placeholder='What needs to be done?'
+                                name='title'
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                required
+                            />
+                        </div>
+
+                        <div className='form-group'>
+                            <label className='form-label'>Description</label>
+                            <input
+                                type='text'
+                                className='form-control'
+                                placeholder='Add more details...'
+                                name='description'
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                            />
+                        </div>
+
+                        <div className='form-group'>
+                            <label className='form-label'>Status</label>
+                            <div className='toggle-group'>
+                                <label className='toggle-switch'>
+                                    <input
+                                        type='checkbox'
+                                        checked={completed}
+                                        onChange={(e) => setCompleted(e.target.checked)}
+                                    />
+                                    <span className='toggle-slider'></span>
+                                </label>
+                                <span className='toggle-label'>
+                                    {completed ? 'Completed' : 'In Progress'}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+                            <button
+                                className='btn btn-primary'
+                                type='submit'
+                                disabled={loading}
+                                style={{ flex: 1 }}
+                            >
+                                {loading ? 'Saving...' : (id ? 'Update Task' : 'Create Task')}
+                            </button>
+                            <button
+                                className='btn btn-secondary'
+                                type='button'
+                                onClick={() => navigate('/todos')}
+                                style={{ flex: 1 }}
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     )

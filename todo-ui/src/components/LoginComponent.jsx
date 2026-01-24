@@ -1,21 +1,24 @@
 import React, { useState } from 'react'
 import { loginAPICALL, saveLoggedInUser, storeToken } from '../services/AuthService'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 
 const LoginComponent = () => {
 
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
+    const [error, setError] = useState('')
+    const [loading, setLoading] = useState(false)
 
     const navigator = useNavigate()
 
     async function handleLoginForm(e) {
         e.preventDefault()
+        setError('')
+        setLoading(true)
 
         await loginAPICALL(username, password).then(response => {
             console.log(response.data)
 
-            // const token = 'Basic ' + window.btoa(username + ":" + password) 
             const token = 'Bearer ' + response.data.accessToken
             const role = response.data.role
             storeToken(token)
@@ -25,64 +28,82 @@ const LoginComponent = () => {
             window.location.reload(false)
         }).catch(error => {
             console.error(error)
+            const msg = error.response?.data?.message
+
+            if (msg === 'Bad credentials') {
+                setError('Invalid username or password')
+            } else {
+                setError('You are not logged in or your session has expired')
+            }
+            setLoading(false)
         })
     }
 
     return (
-        <div className='container'>
-            <br /> <br />
-            <div className='row'>
-                <div className='col-md-6 offset-md'>
-                    <div className='card'>
-                        <div className='card-header'>
-                            <h2 className='text-center'> Login Form </h2>
-                        </div>
+        <div className='page-container'>
+            <div className='auth-container'>
+                <div className='auth-card'>
+                    <div className='auth-header'>
+                        <h2>Welcome Back</h2>
+                        <p>Sign in to continue to TaskFlow</p>
+                    </div>
 
-                        <div className='card-body'>
-                            <form>
-                                <div className='row mb-3'>
-                                    <label className='col-md-3 control-label'> Username or Email </label>
-                                    <div className='col-md-9'>
-                                        <input
-                                            type='text'
-                                            name='username'
-                                            className='form-control'
-                                            placeholder='Enter username'
-                                            value={username}
-                                            onChange={(e) => setUsername(e.target.value)}
-                                        >
-                                        </input>
-                                    </div>
+                    <div className='auth-body'>
+                        <form className='auth-form' onSubmit={handleLoginForm}>
+                            {error && (
+                                <div className='form-group' style={{
+                                    padding: '0.75rem 1rem',
+                                    background: 'rgba(244, 63, 94, 0.1)',
+                                    border: '1px solid rgba(244, 63, 94, 0.3)',
+                                    borderRadius: '8px',
+                                    color: '#f43f5e',
+                                    fontSize: '0.9rem'
+                                }}>
+                                    {error}
                                 </div>
+                            )}
 
-                                <div className='row mb-3'>
-                                    <label className='col-md-3 control-label'> Password </label>
-                                    <div className='col-md-9'>
-                                        <input
-                                            type='password'
-                                            name='password'
-                                            className='form-control'
-                                            placeholder='Enter password'
-                                            value={password}
-                                            onChange={(e) => setPassword(e.target.value)}
-                                        >
-                                        </input>
-                                    </div>
-                                </div>
+                            <div className='form-group'>
+                                <label className='form-label'>Username or Email</label>
+                                <input
+                                    type='text'
+                                    name='username'
+                                    className='form-control'
+                                    placeholder='Enter your username'
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    required
+                                />
+                            </div>
 
-                                <div className='form-group mb-3'>
-                                    <button className='btn btn-primary' onClick={(e) => handleLoginForm(e)}>Submit</button>
+                            <div className='form-group'>
+                                <label className='form-label'>Password</label>
+                                <input
+                                    type='password'
+                                    name='password'
+                                    className='form-control'
+                                    placeholder='Enter your password'
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                />
+                            </div>
 
-                                </div>
-                            </form>
+                            <button
+                                className='btn btn-primary'
+                                type='submit'
+                                disabled={loading}
+                            >
+                                {loading ? 'Signing in...' : 'Sign In'}
+                            </button>
+                        </form>
+                    </div>
 
-                        </div>
-
+                    <div className='auth-footer'>
+                        Don't have an account? <Link to='/register'>Create one</Link>
                     </div>
                 </div>
             </div>
-
-
         </div>
     )
 }

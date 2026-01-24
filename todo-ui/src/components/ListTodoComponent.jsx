@@ -6,6 +6,7 @@ import { isAdminUser } from '../services/AuthService'
 const ListTodoComponent = () => {
 
     const [todos, setTodos] = useState([])
+    const [loading, setLoading] = useState(true)
 
     const navigate = useNavigate()
 
@@ -14,26 +15,28 @@ const ListTodoComponent = () => {
     useEffect(() => {
         listTodos();
     }, [])
-    
-    function listTodos(){
+
+    function listTodos() {
+        setLoading(true)
         getAllTodos().then((response) => {
             setTodos(response.data);
+            setLoading(false)
         }).catch(error => {
             console.error(error);
+            setLoading(false)
         })
     }
 
-    function addNewTodo(){
+    function addNewTodo() {
         navigate('/add-todo')
-
     }
 
-    function updateTodo(id){
+    function updateTodo(id) {
         console.log(id)
         navigate(`/update-todo/${id}`)
     }
-    
-    function removeTodo(id){
+
+    function removeTodo(id) {
         deleteTodo(id).then((response) => {
             listTodos();
         }).catch(error => {
@@ -41,7 +44,7 @@ const ListTodoComponent = () => {
         })
     }
 
-    function markCompleteTodo(id){
+    function markCompleteTodo(id) {
         completeTodo(id).then((response) => {
             listTodos()
         }).catch(error => {
@@ -49,7 +52,7 @@ const ListTodoComponent = () => {
         })
     }
 
-    function markInCompleteTodo(id){
+    function markInCompleteTodo(id) {
         inCompleteTodo(id).then((response) => {
             listTodos();
         }).catch(error => {
@@ -57,52 +60,86 @@ const ListTodoComponent = () => {
         })
     }
 
-  return (
-    <div className='container'>
-        <h2 className='text-center'>List of Todos</h2>
-        {
-            isAdmin &&
-            <button className='btn btn-primary mb-2' onClick={addNewTodo}>Add Todo</button>
-        }
-        <div>
-            <table className='table table-bordered table-striped'>
-                <thead>
-                    <tr>
-                        <th>Todo Title</th>
-                        <th>Todo Description</th>
-                        <th>Todo Completed</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {
-                        todos.map(todo => 
-                            <tr key={todo.id}>
-                                <td>{todo.title}</td>
-                                <td>{todo.description}</td>
-                                <td>{todo.completed ? 'YES': 'NO'}</td>
-                                <td>
-                                    {
-                                        isAdmin &&
-                                        <button className='btn btn-info' onClick={() => updateTodo(todo.id)}>Update</button>
-                                    }
-                                    {
-                                        isAdmin &&
-                                        <button className='btn btn-danger' onClick={() => removeTodo(todo.id)} style={ { marginLeft: "10px" }} >Delete</button>
-                                    }
-                                    <button className='btn btn-success' onClick={() => markCompleteTodo(todo.id)} style={ { marginLeft: "10px" }} >Complete</button>
-                                    <button className='btn btn-info' onClick={() => markInCompleteTodo(todo.id)} style={ { marginLeft: "10px" }} >In Complete</button>
-                                </td>
-                            </tr>
-                        )
-                    }
+    return (
+        <div className='main-container'>
+            <div className='todo-header'>
+                <h2>📋 My Tasks</h2>
+                {isAdmin && (
+                    <button className='btn btn-primary' onClick={addNewTodo}>
+                        + Add New Task
+                    </button>
+                )}
+            </div>
 
-                </tbody>
-            </table>
+            {loading ? (
+                <div className='empty-state'>
+                    <div className='empty-state-icon'>⏳</div>
+                    <h3>Loading tasks...</h3>
+                </div>
+            ) : todos.length === 0 ? (
+                <div className='empty-state'>
+                    <div className='empty-state-icon'>📝</div>
+                    <h3>No tasks yet</h3>
+                    <p>Create your first task to get started!</p>
+                </div>
+            ) : (
+                <div className='todo-list'>
+                    {todos.map((todo, index) => (
+                        <div
+                            className='todo-item'
+                            key={todo.id}
+                            style={{ animationDelay: `${index * 0.05}s` }}
+                        >
+                            <div className='todo-item-header'>
+                                <div className='todo-content'>
+                                    <h3 className='todo-title'>{todo.title}</h3>
+                                    <p className='todo-description'>{todo.description}</p>
+                                </div>
+                                <span className={`todo-status ${todo.completed ? 'status-completed' : 'status-pending'}`}>
+                                    {todo.completed ? '✓ Completed' : '○ Pending'}
+                                </span>
+                            </div>
+
+                            <div className='todo-actions'>
+                                {!todo.completed && (
+                                    <button
+                                        className='btn btn-success btn-sm'
+                                        onClick={() => markCompleteTodo(todo.id)}
+                                    >
+                                        ✓ Complete
+                                    </button>
+                                )}
+                                {todo.completed && (
+                                    <button
+                                        className='btn btn-secondary btn-sm'
+                                        onClick={() => markInCompleteTodo(todo.id)}
+                                    >
+                                        ↩ Reopen
+                                    </button>
+                                )}
+                                {isAdmin && (
+                                    <>
+                                        <button
+                                            className='btn btn-secondary btn-sm'
+                                            onClick={() => updateTodo(todo.id)}
+                                        >
+                                            ✎ Edit
+                                        </button>
+                                        <button
+                                            className='btn btn-danger btn-sm'
+                                            onClick={() => removeTodo(todo.id)}
+                                        >
+                                            🗑 Delete
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
-
-    </div>
-  )
+    )
 }
 
 export default ListTodoComponent
